@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, sans-serif; background: #f7f5f0; padding: 12px 10px 120px 10px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { font-weight: 600; font-size: 1.6rem; color: #2c2b28; padding: 12px 0 10px; border-bottom: 2px solid #d0c9bc; display: flex; justify-content: space-between; align-items: center; }
+        .cart-badge { font-size: 0.75rem; background: #3d8f3d; color: white; padding: 4px 14px; border-radius: 30px; cursor: pointer; }
+        .nav-scroll { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 14px 0; scrollbar-width: none; }
+        .nav-scroll::-webkit-scrollbar { display: none; }
+        .nav-scroll a { display: inline-block; padding: 6px 14px; background: #eae7e0; border-radius: 30px; font-size: 0.75rem; font-weight: 500; color: #3b3a36; text-decoration: none; border: 1px solid #d6d0c4; flex-shrink: 0; }
+        .section-title { font-size: 1.3rem; font-weight: 600; color: #2c2b28; margin: 24px 0 12px 0; padding: 0 0 6px 0; border-bottom: 2px solid #d0c9bc; display: flex; align-items: center; gap: 8px; }
+        .section-title span { font-size: 0.7rem; background: #d0c9bc; padding: 1px 10px; border-radius: 30px; }
+        .menu-grid { display: flex; flex-direction: column; gap: 12px; }
+        .card { background: white; border-radius: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e6e2d9; }
+        .card.allergen-bg { background: #fef7dc; border-color: #d8b84a; }
+        .card.spicy-bg { background: #ffe6e5; border-color: #c94f4a; }
+        .card.in-cart { border-color: #3d8f3d; box-shadow: 0 0 0 2px #3d8f3d; background: #e5f4e0 !important; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+        .dish-name { font-weight: 600; font-size: 1.05rem; color: #1f1e1b; flex: 1; }
+        .badge-group { display: flex; flex-wrap: wrap; gap: 4px; flex-shrink: 0; }
+        .badge { font-size: 0.6rem; font-weight: 600; padding: 2px 8px; border-radius: 30px; background: #eae7e0; color: #3b3a36; border: 1px solid #d6d0c4; white-space: nowrap; }
+        .badge.allergen { background: #ffe484; border-color: #e5b93b; color: #4d3e0c; }
+        .badge.spicy { background: #f8b3b0; border-color: #c63e3a; color: #611f1c; }
+        .description { font-size: 0.88rem; line-height: 1.5; color: #2f2d29; margin: 4px 0 6px; }
+        .note { font-size: 0.78rem; color: #6e6a60; background: #f0ede7; padding: 3px 12px; border-radius: 30px; display: inline-block; margin: 4px 0 8px; }
+        .guest-note-wrapper { margin: 6px 0 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .guest-note-wrapper input { flex: 1; min-width: 100px; padding: 6px 10px; border: 1px solid #d6d0c4; border-radius: 30px; font-size: 0.8rem; background: #fcfbf9; outline: none; font-family: inherit; }
+        .guest-note-wrapper input:focus { border-color: #3d8f3d; box-shadow: 0 0 0 2px rgba(61, 143, 61, 0.15); }
+        .card-actions { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #ece8e0; padding-top: 10px; margin-top: 4px; flex-wrap: wrap; }
+        .btn { padding: 8px 18px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; border: 1px solid #cbc4b6; cursor: pointer; min-height: 40px; min-width: 80px; background: #eae7e0; color: #2a2824; }
+        .btn:active { transform: scale(0.94); }
+        .btn-add { background: #3d8f3d; border-color: #2d6b2d; color: white; }
+        .btn-remove { background: #e8d0d0; border-color: #b88888; color: #6b3a3a; }
+        .cart-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; justify-content: center; align-items: flex-end; padding: 20px 10px 30px; backdrop-filter: blur(2px); }
+        .cart-overlay.open { display: flex; }
+        .cart-panel { background: white; border-radius: 24px 24px 0 0; max-width: 600px; width: 100%; max-height: 80vh; padding: 20px 18px 30px; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; animation: slideUp 0.25s ease; }
+        @keyframes slideUp { 0% { transform: translateY(40px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 2px solid #ece8e0; margin-bottom: 12px; }
+        .cart-header h2 { font-size: 1.2rem; font-weight: 600; color: #2c2b28; }
+        .cart-close { background: #eae7e0; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .cart-list { flex: 1; overflow-y: auto; padding-right: 4px; max-height: 50vh; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0ede7; gap: 8px; flex-wrap: wrap; }
+        .cart-item-info { flex: 1; min-width: 120px; }
+        .cart-item-name { font-weight: 500; font-size: 0.9rem; }
+        .cart-item-note { font-size: 0.75rem; color: #6e6a60; font-style: italic; display: block; }
+        .cart-item-remove { background: #f0ede7; border: 1px solid #d6d0c4; border-radius: 30px; padding: 4px 14px; font-size: 0.7rem; cursor: pointer; min-height: 34px; color: #5b584f; }
+        .cart-footer { border-top: 2px solid #ece8e0; padding-top: 14px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .cart-total { font-weight: 600; font-size: 1.05rem; }
+        .cart-clear { background: #e8d0d0; border: 1px solid #b88888; color: #6b3a3a; padding: 6px 18px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; min-height: 40px; }
+        .counter-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(44,43,40,0.95); backdrop-filter: blur(4px); color: white; padding: 10px 16px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border-top: 2px solid #3d8f3d; z-index: 100; gap: 8px; flex-wrap: wrap; }
+        .counter-bar .count { background: #3d8f3d; padding: 2px 14px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; }
+        .counter-bar .open-cart-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 18px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; min-height: 38px; }
+        .footer-info { margin-top: 24px; font-size: 0.75rem; color: #5b584f; border-top: 1px solid #d8d2c6; padding-top: 14px; text-align: center; }
+        @media (max-width: 380px) { body { padding: 8px 6px 120px 6px; } .dish-name { font-size: 0.95rem; } .description { font-size: 0.8rem; } .card { padding: 12px 10px; } .btn { font-size: 0.7rem; padding: 6px 12px; min-width: 60px; min-height: 34px; } .nav-scroll a { font-size: 0.65rem; padding: 4px 10px; } h1 { font-size: 1.3rem; } .section-title { font-size: 1.1rem; } }
+        @media (min-width: 600px) { .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; } body { padding: 20px 20px 120px 20px; } .container { max-width: 900px; } }
+        @media (min-width: 900px) { .menu-grid { grid-template-columns: repeat(3, 1fr); } .container { max-width: 1200px; } }
+        .card.just-added { animation: pop 0.25s ease; }
+        @keyframes pop { 0% { transform: scale(0.96); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🍽️ Меню <span class="cart-badge" id="cartBadge">🛒 0</span></h1>
+    <nav class="nav-scroll">
+        <a href="#section-cold">🥗 Холодные</a>
+        <a href="#section-hotstarter">🔥 Горячие закуски</a>
+        <a href="#section-soup">🍜 Супы</a>
+        <a href="#section-main">🥘 Горячие блюда</a>
+        <a href="#section-grill">🥩 Гриль</a>
+        <a href="#section-side">🌿 Гарниры</a>
+        <a href="#section-dessert">🍰 Десерты</a>
+        <a href="#section-sauce">🥫 Соусы</a>
+    </nav>
+    <div class="section-title" id="section-cold">🥗 Холодные закуски <span id="count-cold">0</span></div>
+    <div class="menu-grid" id="coldStarters"></div>
+    <div class="section-title" id="section-hotstarter">🔥 Горячие закуски <span id="count-hotstarter">0</span></div>
+    <div class="menu-grid" id="hotStarters"></div>
+    <div class="section-title" id="section-soup">🍜 Супы <span id="count-soup">0</span></div>
+    <div class="menu-grid" id="soups"></div>
+    <div class="section-title" id="section-main">🥘 Горячие блюда <span id="count-main">0</span></div>
+    <div class="menu-grid" id="mainDishes"></div>
+    <div class="section-title" id="section-grill">🥩 Гриль <span id="count-grill">0</span></div>
+    <div class="menu-grid" id="grill"></div>
+    <div class="section-title" id="section-side">🌿 Гарниры <span id="count-side">0</span></div>
+    <div class="menu-grid" id="sides"></div>
+    <div class="section-title" id="section-dessert">🍰 Десерты <span id="count-dessert">0</span></div>
+    <div class="menu-grid" id="desserts"></div>
+    <div class="section-title" id="section-sauce">🥫 Соусы <span id="count-sauce">0</span></div>
+    <div class="menu-grid" id="sauces"></div>
+    <div class="footer-info">⚡ жёлтый — аллергены · 🔴 красный — острое · 📝 заметка для официанта</div>
+</div>
+<div class="cart-overlay" id="cartOverlay">
+    <div class="cart-panel">
+        <div class="cart-header"><h2>🛒 Корзина</h2><button class="cart-close" id="cartClose">✕</button></div>
+        <div class="cart-list" id="cartList"><div style="color:#aaa69a; text-align:center; padding:30px 0;">Пока пусто</div></div>
+        <div class="cart-footer"><span class="cart-total" id="cartTotal">Итого: 0 блюд</span><button class="cart-clear" id="cartClear">Очистить всё</button></div>
+    </div>
+</div>
+<div class="counter-bar">
+    <span>📋 В корзине: <span class="count" id="selectedCount">0</span></span>
+    <button class="open-cart-btn" id="openCartBtn">🛒 Открыть</button>
+</div>
+<script src="menu-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
